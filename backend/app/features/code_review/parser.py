@@ -32,9 +32,7 @@ def parse_review_output(raw: str) -> ReviewOutput:
     try:
         data = json.loads(candidate)
     except json.JSONDecodeError as exc:
-        raise ReviewParseError(
-            f"output was not valid JSON: {exc.msg} at pos {exc.pos}"
-        ) from exc
+        raise ReviewParseError(f"output was not valid JSON: {exc.msg} at pos {exc.pos}") from exc
 
     try:
         return ReviewOutput.model_validate(data)
