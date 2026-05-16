@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Env / secrets
+.env
+.env.local
+*.pem
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Project
+backend/probes/*.joblib
+backend/data/local_cache/
+*.log
