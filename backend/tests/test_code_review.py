@@ -12,7 +12,6 @@ from app.features.code_review.schemas import Category, ReviewOutput, Severity
 from app.features.code_review.service import review_code_diff
 from app.services.llm.mock_provider import MockProvider
 
-
 # ---------- prompt loader ----------
 
 
