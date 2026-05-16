@@ -1,0 +1,11 @@
+diff --git a/utils.py b/utils.py
+index 111..222 100644
+--- a/utils.py
++++ b/utils.py
+@@ -1,8 +1,5 @@
+-def get_full_name(user):
+-    first = user.get("first_name", "")
+-    last = user.get("last_name", "")
+-    return first + " " + last
++def get_full_name(user: dict) -> str:
++    return f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
