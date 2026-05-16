@@ -26,9 +26,7 @@ def load_prompt(version: str) -> PromptVersion:
     path = PROMPTS_DIR / f"{version}.yaml"
     if not path.exists():
         available = sorted(p.stem for p in PROMPTS_DIR.glob("*.yaml"))
-        raise ValueError(
-            f"Unknown prompt version: {version!r}. Available: {available}"
-        )
+        raise ValueError(f"Unknown prompt version: {version!r}. Available: {available}")
     with path.open() as f:
         data = yaml.safe_load(f)
     prompt = PromptVersion.model_validate(data)
