@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 
 import pytest
-from app.datasets.loader import filter_subset, load_dataset, subset_counts
 
+from app.datasets.loader import filter_subset, load_dataset, subset_counts
 from app.datasets.schemas import DatasetSubset, ExpectedComment, GoldenCase
 from app.datasets.scorer import score_case
 from app.features.code_review.schemas import (
