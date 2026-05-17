@@ -15,11 +15,10 @@ from sklearn.model_selection import StratifiedKFold, cross_val_score
 
 from app.core.logging import get_logger
 from app.services.probes.extractor import PROBE_LAYER, extract_activations
+from app.services.probes.scorer import PROBES_DIR
 from app.services.probes.training_data import ALL_PROBES
 
 logger = get_logger("probes.trainer")
-
-PROBES_DIR = Path(__file__).resolve().parents[3] / "probes"
 
 
 @dataclass

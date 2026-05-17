@@ -10,14 +10,14 @@ Design notes:
 from __future__ import annotations
 
 import functools
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import mlx.core as mx
 import numpy as np
-from mlx_lm import load
-from mlx_lm.tokenizer_utils import TokenizerWrapper
 
 from app.core.logging import get_logger
+
+if TYPE_CHECKING:
+    from mlx_lm.tokenizer_utils import TokenizerWrapper
 
 logger = get_logger("probes.extractor")
 
@@ -28,9 +28,10 @@ DEFAULT_MODEL = "mlx-community/Qwen2.5-3B-Instruct-4bit"
 @functools.cache
 def _load_model(model_name: str) -> tuple[Any, TokenizerWrapper]:
     """Load model + tokenizer once. Cached for the process lifetime."""
+    from mlx_lm import load  # lazy: MLX is Apple Silicon only
+
     logger.info("loading_mlx_model", model=model_name)
     result = load(model_name)
-    # mlx-lm versions return either (model, tokenizer) or (model, tokenizer, _)
     model, tokenizer = result[0], result[1]
     return model, tokenizer
 
@@ -59,6 +60,8 @@ def extract_activations(
 
     Output shape: (hidden_dim,) float32. For Qwen2.5-3B, hidden_dim = 2048.
     """
+    import mlx.core as mx  # lazy: MLX is Apple Silicon only
+
     model, tokenizer = _load_model(model_name)
 
     prompt = _build_prompt(diff, model_review)

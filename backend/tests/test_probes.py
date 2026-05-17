@@ -85,7 +85,8 @@ def test_score_with_probes_returns_empty_when_no_probes(tmp_path, monkeypatch) -
 
     _scorer._load_probes.cache_clear()
 
-    with patch("app.services.probes.scorer.extract_activations", side_effect=_mock_extract):
-        scores = score_with_probes("diff", "review")
+    # No need to patch extractor — when no probes exist, scorer short-circuits
+    # before calling extract_activations.
+    scores = score_with_probes("diff", "review")
     assert isinstance(scores, ProbeScores)
     assert scores.is_sycophantic is None

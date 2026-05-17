@@ -5,13 +5,16 @@ from __future__ import annotations
 import functools
 from dataclasses import dataclass
 
+# Lazy import below; importing extractor at module-load triggers MLX
+from pathlib import Path
+
 import joblib
 from sklearn.linear_model import LogisticRegression
 
 from app.core.logging import get_logger
-from app.services.probes.extractor import extract_activations
-from app.services.probes.trainer import PROBES_DIR
 from app.services.probes.training_data import ALL_PROBES
+
+PROBES_DIR = Path(__file__).resolve().parents[3] / "probes"
 
 logger = get_logger("probes.scorer")
 
@@ -53,6 +56,8 @@ def probes_available() -> bool:
 
 def score_with_probes(diff: str, model_review: str) -> ProbeScores:
     """Run all trained probes and return per-behavior probabilities."""
+    from app.services.probes.extractor import extract_activations  # lazy
+
     probes = _load_probes()
     if not probes:
         return ProbeScores(None, None, None, None)
