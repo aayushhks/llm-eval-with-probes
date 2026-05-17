@@ -42,6 +42,7 @@ async def main() -> int:
     parser.add_argument("--notes", default="")
     parser.add_argument("--no-judge", action="store_true", help="Skip LLM-as-judge scoring")
     parser.add_argument("--judge-model", default=None)
+    parser.add_argument("--no-probes", action="store_true", help="Skip probe scoring")
     args = parser.parse_args()
 
     configure_logging("WARNING")
@@ -56,6 +57,7 @@ async def main() -> int:
         notes=args.notes,
         judge_enabled=not args.no_judge,
         judge_model=args.judge_model,
+        probes_enabled=not args.no_probes,
     )
 
     provider = get_provider(config.provider_name)
