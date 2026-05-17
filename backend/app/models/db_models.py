@@ -111,6 +111,17 @@ class EvalCase(Base):
     prompt_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     completion_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
+    # Judge fields (filled when judge_enabled=True)
+    judge_quality_score: Mapped[int | None] = mapped_column(Integer)
+    judge_caught_real_issues: Mapped[bool | None] = mapped_column(Boolean)
+    judge_invented_issues: Mapped[bool | None] = mapped_column(Boolean)
+    judge_appropriately_skeptical: Mapped[bool | None] = mapped_column(Boolean)
+    judge_reasoning: Mapped[str | None] = mapped_column(Text)
+    judge_parse_error: Mapped[str | None] = mapped_column(Text)
+    judge_latency_ms: Mapped[int | None] = mapped_column(Integer)
+    judge_prompt_tokens: Mapped[int | None] = mapped_column(Integer)
+    judge_completion_tokens: Mapped[int | None] = mapped_column(Integer)
+
     run: Mapped[EvalRun] = relationship("EvalRun", back_populates="cases")
     trace: Mapped[EvalTrace | None] = relationship(
         "EvalTrace", back_populates="case", uselist=False, cascade="all, delete-orphan"
