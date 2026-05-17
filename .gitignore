@@ -29,3 +29,5 @@ dist/
 backend/probes/*.joblib
 backend/data/local_cache/
 *.log
+backend/probes/*.joblib
+backend/probes/*.meta.json
