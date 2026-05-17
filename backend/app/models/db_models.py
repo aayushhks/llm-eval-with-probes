@@ -12,6 +12,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     Enum,
+    Float,
     ForeignKey,
     Integer,
     String,
@@ -121,6 +122,12 @@ class EvalCase(Base):
     judge_latency_ms: Mapped[int | None] = mapped_column(Integer)
     judge_prompt_tokens: Mapped[int | None] = mapped_column(Integer)
     judge_completion_tokens: Mapped[int | None] = mapped_column(Integer)
+
+    # Probe scores (filled when probes_enabled=True; requires trained probes)
+    probe_is_sycophantic: Mapped[float | None] = mapped_column(Float)
+    probe_is_refusing: Mapped[float | None] = mapped_column(Float)
+    probe_is_ungrounded: Mapped[float | None] = mapped_column(Float)
+    probe_is_uncertain: Mapped[float | None] = mapped_column(Float)
 
     run: Mapped[EvalRun] = relationship("EvalRun", back_populates="cases")
     trace: Mapped[EvalTrace | None] = relationship(
