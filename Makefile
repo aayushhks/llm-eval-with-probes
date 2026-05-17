@@ -36,3 +36,18 @@ db-shell:  ## Postgres psql
 clean:  ## Remove all containers, volumes, caches
 	docker compose down -v
 	rm -rf backend/.venv backend/.pytest_cache backend/.ruff_cache backend/.mypy_cache
+
+db-revision:  ## Generate a new alembic migration (use: make db-revision msg="something")
+	cd backend && uv run alembic revision --autogenerate -m "$(msg)"
+
+db-upgrade:  ## Apply all pending migrations
+	cd backend && uv run alembic upgrade head
+
+db-downgrade:  ## Roll back one migration
+	cd backend && uv run alembic downgrade -1
+
+eval-v1:  ## Run full eval with prompt v1
+	cd backend && uv run python ../scripts/run_eval.py --prompt v1
+
+eval-v2:  ## Run full eval with prompt v2
+	cd backend && uv run python ../scripts/run_eval.py --prompt v2
