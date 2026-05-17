@@ -81,6 +81,19 @@ async def get_run(
                     "prompt": c.prompt_tokens,
                     "completion": c.completion_tokens,
                 },
+                "judge": {
+                    "quality_score": c.judge_quality_score,
+                    "caught_real_issues": c.judge_caught_real_issues,
+                    "invented_issues": c.judge_invented_issues,
+                    "appropriately_skeptical": c.judge_appropriately_skeptical,
+                    "reasoning": c.judge_reasoning,
+                    "parse_error": c.judge_parse_error,
+                    "latency_ms": c.judge_latency_ms,
+                    "tokens": {
+                        "prompt": c.judge_prompt_tokens,
+                        "completion": c.judge_completion_tokens,
+                    },
+                },
             }
             for c in run.cases
         ],
