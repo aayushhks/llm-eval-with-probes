@@ -21,6 +21,11 @@ dependencies = [
     "aiolimiter>=1.1",
     "greenlet>=3.5.0",
     "aiosqlite>=0.20",
+    "mlx>=0.21",
+    "mlx-lm>=0.20",
+    "scikit-learn>=1.5",
+    "numpy>=2.0",
+    "joblib>=1.4",
 ]
 
 [dependency-groups]
@@ -44,6 +49,9 @@ select = ["E", "F", "I", "N", "UP", "B", "SIM", "ASYNC"]
 
 [tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["N999"]
+"**/probes/trainer.py" = ["N806"]
+"**/probes/scorer.py" = ["N806"]
+"**/tests/**" = ["N806"]
 
 [tool.mypy]
 python_version = "3.12"
