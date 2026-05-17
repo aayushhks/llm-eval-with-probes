@@ -40,6 +40,8 @@ async def main() -> int:
     parser.add_argument("--concurrency", type=int, default=4)
     parser.add_argument("--rpm", type=int, default=25)
     parser.add_argument("--notes", default="")
+    parser.add_argument("--no-judge", action="store_true", help="Skip LLM-as-judge scoring")
+    parser.add_argument("--judge-model", default=None)
     args = parser.parse_args()
 
     configure_logging("WARNING")
@@ -52,6 +54,8 @@ async def main() -> int:
         concurrency=args.concurrency,
         requests_per_minute=args.rpm,
         notes=args.notes,
+        judge_enabled=not args.no_judge,
+        judge_model=args.judge_model,
     )
 
     provider = get_provider(config.provider_name)
