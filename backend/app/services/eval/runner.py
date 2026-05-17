@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import uuid
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -23,6 +23,7 @@ from app.services.judge.schemas import JudgeOutput
 from app.services.judge.service import JudgeResult, judge_review
 from app.services.llm.base import LLMProvider
 from app.services.llm.types import ProviderName
+from app.services.probes.scorer import probes_available, score_with_probes
 
 logger = get_logger("eval.runner")
 
@@ -33,15 +34,16 @@ class EvalRunConfig:
     model: str
     provider_name: ProviderName
     dataset_path: Path | None = None
-    case_ids: Sequence[str] | None = None  # if set, run only these
-    subset: str | None = None  # if set, run only this subset
+    case_ids: Sequence[str] | None = None
+    subset: str | None = None
     concurrency: int = 1
-    requests_per_minute: int = 20  # under Groq's 30 RPM cap
+    requests_per_minute: int = 20
     notes: str = ""
     judge_enabled: bool = True
-    judge_provider_name: ProviderName | None = None  # defaults to provider_name
-    judge_model: str | None = None  # defaults to settings.default_judge_model
+    judge_provider_name: ProviderName | None = None
+    judge_model: str | None = None
     judge_prompt_version: str = "v1"
+    probes_enabled: bool = True
 
 
 @dataclass
@@ -50,6 +52,7 @@ class CaseExecution:
     review: ReviewResult
     score: CaseScore
     judge: JudgeResult | None = None
+    probe_scores: dict[str, float | None] = field(default_factory=dict)
 
 
 async def _judge_one(
@@ -118,6 +121,12 @@ def _summarize(executions: list[CaseExecution]) -> dict[str, Any]:
     judge_skeptical: list[bool] = []
     judge_prompt_tokens = 0
     judge_completion_tokens = 0
+    probe_means: dict[str, list[float]] = {
+        "is_sycophantic": [],
+        "is_refusing": [],
+        "is_ungrounded": [],
+        "is_uncertain": [],
+    }
 
     for ex in executions:
         bucket = by_subset.setdefault(ex.case.subset.value, {"passed": 0, "total": 0})
@@ -127,6 +136,7 @@ def _summarize(executions: list[CaseExecution]) -> dict[str, Any]:
             total_passed += 1
         total_prompt_tokens += ex.review.raw_response.usage.prompt_tokens
         total_completion_tokens += ex.review.raw_response.usage.completion_tokens
+
         if ex.judge and ex.judge.output:
             judge_quality_scores.append(ex.judge.output.quality_score)
             judge_caught.append(ex.judge.output.caught_real_issues)
@@ -134,6 +144,10 @@ def _summarize(executions: list[CaseExecution]) -> dict[str, Any]:
             judge_skeptical.append(ex.judge.output.appropriately_skeptical)
             judge_prompt_tokens += ex.judge.raw_response.usage.prompt_tokens
             judge_completion_tokens += ex.judge.raw_response.usage.completion_tokens
+
+        for k, v in ex.probe_scores.items():
+            if v is not None and k in probe_means:
+                probe_means[k].append(v)
 
     judge_summary: dict[str, Any] = {}
     if judge_quality_scores:
@@ -149,6 +163,14 @@ def _summarize(executions: list[CaseExecution]) -> dict[str, Any]:
             },
         }
 
+    probes_summary: dict[str, Any] = {
+        name: {
+            "n": len(scores),
+            "mean": round(sum(scores) / len(scores), 3) if scores else None,
+        }
+        for name, scores in probe_means.items()
+    }
+
     return {
         "total": len(executions),
         "passed": total_passed,
@@ -159,6 +181,7 @@ def _summarize(executions: list[CaseExecution]) -> dict[str, Any]:
             "completion": total_completion_tokens,
         },
         "judge": judge_summary,
+        "probes": probes_summary,
     }
 
 
@@ -224,7 +247,6 @@ async def run_eval(
         ]
         executions = await asyncio.gather(*review_tasks)
 
-        # Judge phase (sequential under same limiter to stay under rate caps)
         if config.judge_enabled and judge_provider is not None:
             judge_tasks = [
                 _judge_one(
@@ -241,6 +263,22 @@ async def run_eval(
             judge_results = await asyncio.gather(*judge_tasks)
             for ex, jr in zip(executions, judge_results, strict=True):
                 ex.judge = jr
+
+        # Probe phase (synchronous, local MLX). Runs after judge.
+        if config.probes_enabled and probes_available():
+            for ex in executions:
+                scores = score_with_probes(ex.case.diff, ex.review.raw_response.content)
+                ex.probe_scores = scores.to_dict()
+                logger.info(
+                    "probes_scored",
+                    case_id=ex.case.id,
+                    **{
+                        k: round(v, 3) if v is not None else None
+                        for k, v in ex.probe_scores.items()
+                    },
+                )
+        elif config.probes_enabled:
+            logger.warning("probes_enabled_but_not_trained_skipping")
 
         for ex in executions:
             judge_out: JudgeOutput | None = ex.judge.output if ex.judge else None
@@ -272,6 +310,10 @@ async def run_eval(
                 judge_completion_tokens=(
                     ex.judge.raw_response.usage.completion_tokens if ex.judge else None
                 ),
+                probe_is_sycophantic=ex.probe_scores.get("is_sycophantic"),
+                probe_is_refusing=ex.probe_scores.get("is_refusing"),
+                probe_is_ungrounded=ex.probe_scores.get("is_ungrounded"),
+                probe_is_uncertain=ex.probe_scores.get("is_uncertain"),
             )
             session.add(case_row)
             await session.flush()
