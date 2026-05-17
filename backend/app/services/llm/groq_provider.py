@@ -38,8 +38,8 @@ class GroqProvider:
 
     async def complete(self, request: LLMRequest) -> LLMResponse:
         retrying = AsyncRetrying(
-            stop=stop_after_attempt(settings.max_retries),
-            wait=wait_exponential(multiplier=settings.initial_retry_delay_seconds, max=30),
+            stop=stop_after_attempt(8),
+            wait=wait_exponential(multiplier=2, min=2, max=60),
             retry=retry_if_exception_type((RateLimitError, APIStatusError)),
             reraise=True,
         )
