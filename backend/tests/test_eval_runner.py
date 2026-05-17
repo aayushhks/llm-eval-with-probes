@@ -107,7 +107,8 @@ async def test_run_eval_persists_run_with_cases(session: AsyncSession, tmp_path)
         provider_name=ProviderName.MOCK,
         dataset_path=path,
         concurrency=2,
-        requests_per_minute=600,  # disable for tests
+        requests_per_minute=600,
+        judge_enabled=False,
     )
 
     run = await run_eval(config, provider, session)
