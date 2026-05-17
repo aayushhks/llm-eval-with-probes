@@ -93,6 +93,12 @@ async def get_run(
                         "prompt": c.judge_prompt_tokens,
                         "completion": c.judge_completion_tokens,
                     },
+                    "probes": {
+                        "is_sycophantic": c.probe_is_sycophantic,
+                        "is_refusing": c.probe_is_refusing,
+                        "is_ungrounded": c.probe_is_ungrounded,
+                        "is_uncertain": c.probe_is_uncertain,
+                    },
                 },
             }
             for c in run.cases
