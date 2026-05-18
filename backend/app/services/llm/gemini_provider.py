@@ -58,7 +58,7 @@ class GeminiProvider:
                 with attempt:
                     response = await self._client.aio.models.generate_content(
                         model=request.model,
-                        contents=contents,
+                        contents=contents,  # type: ignore[arg-type]
                         config=config,
                     )
         except genai_errors.APIError as exc:
