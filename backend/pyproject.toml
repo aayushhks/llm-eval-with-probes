@@ -26,6 +26,8 @@ dependencies = [
     "scikit-learn>=1.5",
     "numpy>=2.0",
     "joblib>=1.4",
+    "matplotlib>=3.9",
+    "pandas>=2.2",
 ]
 
 [dependency-groups]
