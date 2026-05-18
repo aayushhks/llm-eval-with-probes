@@ -1,21 +1,19 @@
-import { useEffect, useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Layout from "./components/Layout";
+import RunsList from "./pages/RunsList";
+import RunDetailPage from "./pages/RunDetail";
+import Compare from "./pages/Compare";
 
 export default function App() {
-  const [health, setHealth] = useState<string>("checking...");
-
-  useEffect(() => {
-    fetch("/api/health")
-      .then((r) => r.json())
-      .then((d) => setHealth(d.status))
-      .catch(() => setHealth("unreachable"));
-  }, []);
-
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-semibold tracking-tight">interp-eval</h1>
-        <p className="mt-2 text-zinc-400">Backend health: <span className="font-mono">{health}</span></p>
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<RunsList />} />
+          <Route path="/runs/:id" element={<RunDetailPage />} />
+          <Route path="/compare" element={<Compare />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
