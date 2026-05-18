@@ -13,6 +13,7 @@ from sqlalchemy.orm import selectinload
 from app.core.database import get_session
 from app.models.db_models import EvalCase, EvalRun
 from app.services.analysis.disagreement import analyze_run
+from app.services.analysis.regression import diff_runs, summarize_diff
 
 router = APIRouter(prefix="/runs", tags=["runs"])
 
@@ -196,4 +197,33 @@ async def get_disagreements(
         "flagged_cases": len(items),
         "flag_totals": flag_totals,
         "disagreements": items,
+    }
+
+
+@router.get("/compare/{run_a_id}/{run_b_id}")
+async def compare_runs(
+    run_a_id: uuid.UUID,
+    run_b_id: uuid.UUID,
+    session: SessionDep,
+) -> dict[str, Any]:
+    """Per-case diff between two runs. A is baseline, B is candidate."""
+    try:
+        diffs = await diff_runs(session, run_a_id, run_b_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    summary = summarize_diff(diffs)
+
+    # Order: regressions first (most important), then mixed, then improvements,
+    # then unchanged
+    order = {"regression": 0, "mixed": 1, "improvement": 2, "unchanged": 3}
+    diffs_sorted = sorted(diffs, key=lambda d: order[d.overall_change])
+
+    return {
+        "run_a": str(run_a_id),
+        "run_b": str(run_b_id),
+        "total_cases": len(diffs),
+        "summary": summary,
+        "regressions": [d.to_dict() for d in diffs_sorted if d.overall_change == "regression"],
+        "all_diffs": [d.to_dict() for d in diffs_sorted],
     }
