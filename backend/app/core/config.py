@@ -12,7 +12,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "interp-eval"
+    app_name: str = "llm-eval-with-probes"
     environment: str = "development"
     database_url: str = "postgresql+asyncpg://eval:eval@db:5432/eval"
 

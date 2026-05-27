@@ -1,6 +1,6 @@
 # Headline findings: when probes catch what judges miss
 
-interp-eval produces three independent scorers for each model review:
+llm-eval-with-probes produces three independent scorers for each model review:
 
 1. **Deterministic** — keyword/severity rules over expected issues (M3)
 2. **LLM-as-judge** — Llama 3.3 70B Versatile rating the review 0–10 (M5)

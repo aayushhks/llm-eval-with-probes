@@ -1,4 +1,4 @@
-# interp-eval
+# llm-eval-with-probes
 
 An LLM evaluation platform that scores model behavior with **three independent dimensions**: deterministic rules, an LLM-as-judge, and probing classifiers trained on the model's hidden states. The disagreements between them are where the interesting failures live.
 
@@ -105,8 +105,8 @@ You need: Docker, Python 3.12+, Node 20+, a Groq API key (free tier works), and 
 
 ```bash
 # 1. clone
-git clone https://github.com/aayushhks/interp-eval.git
-cd interp-eval
+git clone https://github.com/aayushhks/llm-eval-with-probes.git
+cd llm-eval-with-probes
 
 # 2. .env
 cp .env.example .env
