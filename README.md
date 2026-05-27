@@ -42,29 +42,11 @@ The probes are the unique part. They're trained on contrastive examples (about 5
 
 ## Architecture
 
-```
-┌──────────────┐    ┌────────────────────────────────────────────────┐
-│   datasets/  │    │                  backend/ (FastAPI)            │
-│  golden_v1   │───▶│                                                │
-│   (JSONL)    │    │   eval runner ──▶ Groq (Llama 3.1 8B reviews)  │
-└──────────────┘    │                ──▶ Groq (Llama 3.3 70B judge)  │
-                    │                ──▶ MLX (Qwen2.5-3B probes)     │
-                    │                                                │
-                    │   ──▶ Postgres (runs, cases, traces)           │
-                    └────────────────────────────────────────────────┘
-                                          │
-                                          ▼
-                            ┌────────────────────────────────┐
-                            │  frontend/ (React + Tailwind)  │
-                            │  runs list · run detail        │
-                            │  · compare view                │
-                            └────────────────────────────────┘
-```
+![Architecture](docs/figures/architecture.svg)
 
-- Backend: Python 3.13, FastAPI, SQLAlchemy 2 async, Pydantic v2, Alembic, Groq SDK, MLX, scikit-learn
-- Frontend: React 19, Vite, Tailwind v4, recharts, react-router-dom
-- Infra: Postgres 16 (Docker), uv for Python deps
-- CI: ruff + mypy + pytest on every push; eval-gate workflow on PR
+Top-down: golden dataset feeds the eval runner, which fans out to three independent scorers
+plus the subject model (Llama 3.1 8B). Results land in Postgres. The React dashboard reads
+from the API; the GitHub Actions eval gate runs the same comparison on every PR.
 
 ---
 
