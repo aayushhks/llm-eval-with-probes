@@ -11,6 +11,8 @@ WORKDIR /app
 COPY pyproject.toml uv.lock* ./
 COPY app ./app
 COPY tests ./tests
+COPY alembic ./alembic
+COPY alembic.ini ./alembic.ini
 
 # Install everything including project
 RUN uv sync --frozen || uv sync
