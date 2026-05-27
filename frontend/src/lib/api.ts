@@ -110,8 +110,10 @@ export interface CompareResponse {
   all_diffs: CaseDiff[];
 }
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
+
 async function http<T>(path: string): Promise<T> {
-  const resp = await fetch(`/api${path}`);
+  const resp = await fetch(`${API_BASE}${path}`);
   if (!resp.ok) {
     throw new Error(`API ${resp.status}: ${path}`);
   }
