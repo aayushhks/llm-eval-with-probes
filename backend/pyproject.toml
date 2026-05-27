@@ -21,13 +21,17 @@ dependencies = [
     "aiolimiter>=1.1",
     "greenlet>=3.5.0",
     "aiosqlite>=0.20",
-    "mlx>=0.21",
-    "mlx-lm>=0.20",
     "scikit-learn>=1.5",
     "numpy>=2.0",
     "joblib>=1.4",
     "matplotlib>=3.9",
     "pandas>=2.2",
+]
+
+[project.optional-dependencies]
+mlx = [
+    "mlx>=0.21",
+    "mlx-lm>=0.20",
 ]
 
 [dependency-groups]

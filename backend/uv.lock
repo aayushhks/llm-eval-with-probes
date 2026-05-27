@@ -865,8 +865,6 @@ dependencies = [
     { name = "httpx" },
     { name = "joblib" },
     { name = "matplotlib" },
-    { name = "mlx" },
-    { name = "mlx-lm" },
     { name = "numpy" },
     { name = "pandas" },
     { name = "pydantic" },
@@ -878,6 +876,12 @@ dependencies = [
     { name = "structlog" },
     { name = "tenacity" },
     { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.optional-dependencies]
+mlx = [
+    { name = "mlx" },
+    { name = "mlx-lm" },
 ]
 
 [package.dev-dependencies]
@@ -904,8 +908,8 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28" },
     { name = "joblib", specifier = ">=1.4" },
     { name = "matplotlib", specifier = ">=3.9" },
-    { name = "mlx", specifier = ">=0.21" },
-    { name = "mlx-lm", specifier = ">=0.20" },
+    { name = "mlx", marker = "extra == 'mlx'", specifier = ">=0.21" },
+    { name = "mlx-lm", marker = "extra == 'mlx'", specifier = ">=0.20" },
     { name = "numpy", specifier = ">=2.0" },
     { name = "pandas", specifier = ">=2.2" },
     { name = "pydantic", specifier = ">=2.9" },
@@ -918,6 +922,7 @@ requires-dist = [
     { name = "tenacity", specifier = ">=9.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.32" },
 ]
+provides-extras = ["mlx"]
 
 [package.metadata.requires-dev]
 dev = [
