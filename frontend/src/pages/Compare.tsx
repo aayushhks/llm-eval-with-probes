@@ -8,10 +8,13 @@ import {
 } from "../lib/api";
 import { Badge } from "../components/Badge";
 
+const DEFAULT_BASELINE = "da6cbf86-bf65-4383-9280-751a539bd3c9"; // v1 with probes
+const DEFAULT_CANDIDATE = "09572347-d7d3-4a20-9709-8416b32657e5"; // v2 with probes
+
 export default function Compare() {
   const [params, setParams] = useSearchParams();
-  const a = params.get("a") || "";
-  const b = params.get("b") || "";
+  const a = params.get("a") || DEFAULT_BASELINE;
+  const b = params.get("b") || DEFAULT_CANDIDATE;
 
   const [runs, setRuns] = useState<RunListItem[]>([]);
   const [diff, setDiff] = useState<CompareResponse | null>(null);
@@ -129,8 +132,21 @@ function DiffView({ diff }: { diff: CompareResponse }) {
   const improvements = diff.all_diffs.filter((d) => d.overall_change === "improvement");
   const unchanged = diff.all_diffs.filter((d) => d.overall_change === "unchanged");
 
+  // Are any probe deltas populated?
+  const anyProbeDeltas = diff.all_diffs.some((d) =>
+    Object.values(d.probes.deltas).some((v) => v !== null)
+  );
+
   return (
     <div className="space-y-6">
+      {!anyProbeDeltas && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-900">
+          One or both of these runs was scored without probes — probe Δ columns will be empty.
+          For a full probe-enabled comparison, select two runs marked <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-sky-100 text-sky-800">on</span> in
+          the runs list (the two newest v1/v2 runs).
+        </div>
+      )}
+
       <div className="grid grid-cols-4 gap-3">
         <StatCard label="regressions" value={s.regression ?? 0} tone="bad" />
         <StatCard label="mixed" value={s.mixed ?? 0} tone="warn" />

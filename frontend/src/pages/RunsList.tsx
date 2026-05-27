@@ -36,6 +36,18 @@ export default function RunsList() {
 
   return (
     <div>
+      <div className="bg-sky-50 border border-sky-200 rounded-lg p-4 mb-6">
+        <div className="text-sm text-zinc-700 leading-relaxed">
+          <strong>Three scorers per case</strong> — deterministic rules, an LLM-as-judge (Llama 3.3 70B),
+          and probing classifiers trained on Qwen2.5-3B hidden states. Where the three disagree
+          is where the interesting failures live. Click a run marked{" "}
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-sky-100 text-sky-800">on</span>
+          {" "}in the probes column to see the full disagreement story, or head to{" "}
+          <Link to="/compare" className="text-sky-700 underline hover:text-sky-900">compare</Link>
+          {" "}to diff two runs.
+        </div>
+      </div>
+
       <div className="mb-6">
         <h1 className="text-2xl font-semibold tracking-tight">Runs</h1>
         <p className="text-sm text-zinc-500 mt-1">
@@ -48,6 +60,7 @@ export default function RunsList() {
           <thead className="bg-zinc-50 text-zinc-500 text-xs uppercase tracking-wider">
             <tr>
               <th className="text-left px-4 py-3">prompt</th>
+              <th className="text-left px-4 py-3">notes</th>
               <th className="text-left px-4 py-3">model</th>
               <th className="text-left px-4 py-3">started</th>
               <th className="text-right px-4 py-3">cases</th>
@@ -85,6 +98,9 @@ function RunRow({ run }: { run: RunListItem }) {
         >
           {run.prompt_version}
         </Link>
+      </td>
+      <td className="px-4 py-3 text-zinc-600 text-xs max-w-xs truncate">
+        {run.notes || <span className="text-zinc-300">—</span>}
       </td>
       <td className="px-4 py-3 font-mono text-xs text-zinc-600">
         {run.model}
