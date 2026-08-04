@@ -21,8 +21,11 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
 
+_extra_origins = [o.strip() for o in settings.cors_allow_origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=_extra_origins,
     allow_origin_regex=r"http://localhost:\d+|http://127\.0\.0\.1:\d+|https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],

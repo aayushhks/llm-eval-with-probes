@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     gemini_api_key: str = ""
 
+    # Comma-separated origins allowed on top of the built-in localhost/Vercel
+    # patterns — used to whitelist a deployed dashboard's own domain.
+    cors_allow_origins: str = ""
+
     default_subject_model: str = "llama-3.1-8b-instant"
     default_judge_model: str = "llama-3.3-70b-versatile"
     default_gemini_model: str = "gemini-2.0-flash"

@@ -1,0 +1,25 @@
+# SITE_ADDRESS=:80          -> plain HTTP on the instance's public IP
+# SITE_ADDRESS=eval.foo.com -> Caddy provisions and renews TLS automatically
+{$SITE_ADDRESS} {
+	encode gzip
+
+	# The API lives on the same origin under /api, so the frontend's default
+	# base URL works untouched and no CORS preflight is involved.
+	handle /api/* {
+		uri strip_prefix /api
+		reverse_proxy backend:8000
+	}
+
+	# SPA fallback — same behaviour as the Vercel rewrite, so deep links and
+	# refreshes resolve to index.html instead of 404ing.
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
