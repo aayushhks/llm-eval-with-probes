@@ -119,6 +119,23 @@ cd backend && uv run uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 ---
 
+## Deploying
+
+The dashboard runs on a single AWS EC2 instance — Postgres, the API, and the
+built frontend behind Caddy, all via `docker-compose.prod.yaml`. Free tier
+covers it for 12 months.
+
+```bash
+docker compose -f docker-compose.prod.yaml up -d --build
+```
+
+Step-by-step (instance setup, TLS, loading local eval results into the hosted
+DB): [`deploy/DEPLOY.md`](deploy/DEPLOY.md). The probes stay on your Mac — MLX is
+Apple Silicon only, so results are dumped to the server rather than generated
+there.
+
+---
+
 ## CLI tools
 
 ```bash
