@@ -1,24 +1,45 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   api,
+  StaticDataMissing,
   type CaseDiff,
   type CompareResponse,
   type RunListItem,
 } from "../lib/api";
 import { Badge } from "../components/Badge";
 
-const DEFAULT_BASELINE = "da6cbf86-bf65-4383-9280-751a539bd3c9"; // v1 with probes
-const DEFAULT_CANDIDATE = "09572347-d7d3-4a20-9709-8416b32657e5"; // v2 with probes
+function hasProbes(r: RunListItem): boolean {
+  const probes = r.summary?.probes;
+  return !!probes && Object.values(probes).some((p) => (p?.n ?? 0) > 0);
+}
+
+// The pair the page opens on, derived from the data instead of pinned to run
+// ids — re-exporting a fresh set of runs would otherwise strand the default on
+// ids that no longer exist. Prefers the newest probe-scored v1/v2.
+function pickDefaultPair(runs: RunListItem[]): { a: string; b: string } {
+  if (runs.length === 0) return { a: "", b: "" };
+  const newestFirst = [...runs].sort(
+    (x, y) => Date.parse(y.started_at) - Date.parse(x.started_at),
+  );
+  const probed = newestFirst.filter(hasProbes);
+  const candidates = probed.length >= 2 ? probed : newestFirst;
+  const v1 = candidates.find((r) => r.prompt_version === "v1");
+  const v2 = candidates.find((r) => r.prompt_version === "v2");
+  if (v1 && v2) return { a: v1.id, b: v2.id };
+  return { a: candidates[1]?.id ?? "", b: candidates[0]?.id ?? "" };
+}
 
 export default function Compare() {
   const [params, setParams] = useSearchParams();
-  const a = params.get("a") || DEFAULT_BASELINE;
-  const b = params.get("b") || DEFAULT_CANDIDATE;
-
   const [runs, setRuns] = useState<RunListItem[]>([]);
   const [diff, setDiff] = useState<CompareResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [missingPair, setMissingPair] = useState(false);
+
+  const defaults = useMemo(() => pickDefaultPair(runs), [runs]);
+  const a = params.get("a") || defaults.a;
+  const b = params.get("b") || defaults.b;
 
   useEffect(() => {
     api.listRuns(50).then(setRuns).catch(() => undefined);
@@ -31,10 +52,17 @@ export default function Compare() {
     }
     setDiff(null);
     setError(null);
+    setMissingPair(false);
     api
       .compareRuns(a, b)
       .then(setDiff)
-      .catch((e) => setError(String(e)));
+      .catch((e) => {
+        if (e instanceof StaticDataMissing) {
+          setMissingPair(true);
+        } else {
+          setError(e instanceof Error ? e.message : String(e));
+        }
+      });
   }, [a, b]);
 
   return (
@@ -68,7 +96,15 @@ export default function Compare() {
         </div>
       )}
 
-      {a && b && !diff && !error && (
+      {missingPair && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-900">
+          This pair was not part of the static export, so there is no diff to
+          show. Pick another combination — every run in the dropdowns was
+          exported.
+        </div>
+      )}
+
+      {a && b && !diff && !error && !missingPair && (
         <div className="text-zinc-500">Loading diff…</div>
       )}
 
@@ -76,7 +112,9 @@ export default function Compare() {
 
       {(!a || !b) && !error && (
         <div className="text-sm text-zinc-500 border border-dashed border-zinc-300 rounded p-6 text-center">
-          Select both runs to see the diff.
+          {runs.length === 0
+            ? "Loading runs…"
+            : "Select both runs to see the diff."}
         </div>
       )}
     </div>
