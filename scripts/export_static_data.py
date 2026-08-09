@@ -56,8 +56,21 @@ def write(name: str, payload: Any) -> int:
 
 
 def preflight() -> None:
+    # A connection failure and an HTTP error mean very different things here:
+    # the first is a network/DNS problem, the second is a live host saying the
+    # app is not there. Worth telling apart before concluding the data is gone.
     try:
         health = fetch("/health")
+    except urllib.error.HTTPError as exc:
+        sys.exit(
+            f"{BASE} answered HTTP {exc.code} — the host is up but the app did "
+            "not serve /health.\n"
+            "the service may be stopped, redeployed elsewhere, or removed. do "
+            "not delete anything yet: the database may still hold the runs even "
+            "when the api is gone.\n"
+            "point EXPORT_BASE_URL at a working backend (including a local one) "
+            "and re-run."
+        )
     except urllib.error.URLError as exc:
         sys.exit(
             f"cannot reach {BASE}: {exc}\n"
