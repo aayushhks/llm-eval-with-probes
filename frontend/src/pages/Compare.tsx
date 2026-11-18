@@ -75,7 +75,7 @@ export default function Compare() {
         </p>
       </div>
 
-      <div className="bg-white border border-zinc-200 rounded-lg p-4 grid grid-cols-2 gap-4">
+      <div className="bg-white border border-zinc-200 rounded-lg p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         <RunPicker
           label="baseline (A)"
           runs={runs}
@@ -185,7 +185,7 @@ function DiffView({ diff }: { diff: CompareResponse }) {
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard label="regressions" value={s.regression ?? 0} tone="bad" />
         <StatCard label="mixed" value={s.mixed ?? 0} tone="warn" />
         <StatCard label="improvements" value={s.improvement ?? 0} tone="good" />
@@ -248,11 +248,11 @@ function DiffSection({
             <tr>
               <th className="text-left px-3 py-3">case</th>
               <th className="text-left px-3 py-3">subset</th>
-              <th className="text-center px-3 py-3">det</th>
+              <th className="text-center px-3 py-3">Rules</th>
               <th className="text-center px-3 py-3">judge</th>
-              <th className="text-center px-3 py-3">syco Δ</th>
-              <th className="text-center px-3 py-3">uncert Δ</th>
-              <th className="text-center px-3 py-3">ungrnd Δ</th>
+              <th className="text-center px-3 py-3">Sycophancy Δ</th>
+              <th className="text-center px-3 py-3">Uncertainty Δ</th>
+              <th className="text-center px-3 py-3">Ungrounded Δ</th>
             </tr>
           </thead>
           <tbody>

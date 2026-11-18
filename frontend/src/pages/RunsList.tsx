@@ -36,26 +36,26 @@ export default function RunsList() {
 
   return (
     <div>
-      <div className="bg-sky-50 border border-sky-200 rounded-lg p-4 mb-6">
-        <div className="text-sm text-zinc-700 leading-relaxed">
-          <strong>Three scorers per case</strong> — deterministic rules, an LLM-as-judge (Llama 3.3 70B),
-          and probing classifiers trained on Qwen2.5-3B hidden states. Where the three disagree
-          is where the interesting failures live. Click a run marked{" "}
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-sky-100 text-sky-800">on</span>
-          {" "}in the probes column to see the full disagreement story, or head to{" "}
-          <Link to="/compare" className="text-sky-700 underline hover:text-sky-900">compare</Link>
-          {" "}to diff two runs.
+      <div className="study-heading"><p className="eyebrow">EXPERIMENT NOTEBOOK</p><h1>How do we know a review is good?</h1><p>Compare code reviews across three scoring methods, then inspect the cases where their conclusions differ.</p></div>
+      <section className="study-panel" aria-label="Prompt experiment overview">
+        <div className="study-caption"><span>01 / PROMPT EXPERIMENTS</span><Link to="/compare">Open comparison →</Link></div>
+        <div className="experiment-grid">
+          {[...runs].sort((a,b) => a.prompt_version.localeCompare(b.prompt_version)).map(r => (
+            <Link className="experiment" key={r.id} to={`/runs/${r.id}`}>
+              <div className="experiment-title"><span>{r.prompt_version}</span><h2>{r.prompt_version === "v1" ? "Baseline prompt" : r.prompt_version === "v2" ? "Anti-sycophancy prompt" : "Prompt experiment"}</h2><span aria-hidden="true">→</span></div>
+              <p className="experiment-model">{r.model} · {r.dataset_size} cases</p>
+              <div className="metric-row"><span>Rule-based pass rate</span><strong>{Math.round((r.summary?.pass_rate ?? 0)*100)}%</strong></div>
+              <div className="metric-track"><span style={{width:`${(r.summary?.pass_rate ?? 0)*100}%`}} /></div>
+              <div className="metric-row judge-metric"><span>Judge quality score</span><strong>{r.summary?.judge?.mean_quality?.toFixed(1) ?? "—"}<small> / 10</small></strong></div>
+              <p className="experiment-link">Inspect scores & disagreements</p>
+            </Link>
+          ))}
         </div>
-      </div>
-
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Runs</h1>
-        <p className="text-sm text-zinc-500 mt-1">
-          {runs.length} run{runs.length === 1 ? "" : "s"}, newest first
-        </p>
-      </div>
-
-      <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden">
+        <p className="study-footnote">These are different measures: passing the rules and receiving a high judge score are not equivalent. Results describe this small, recorded benchmark.</p>
+      </section>
+      <div className="method-strip"><div><b>01</b><strong>Rules</strong><p>Check expected issues, severity, and approval.</p></div><div><b>02</b><strong>LLM judge</strong><p>Llama 3.3 70B scores the quality of each review.</p></div><div><b>03</b><strong>Behavioral probes</strong><p>Classifiers use Qwen2.5-3B activations to flag behavioral signals.</p></div></div>
+      <div className="run-register"><h2>Run register</h2><span>{runs.length} recorded runs · newest first</span></div>
+      <div className="bg-white border border-zinc-200 rounded-lg overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-zinc-50 text-zinc-500 text-xs uppercase tracking-wider">
             <tr>
@@ -64,8 +64,8 @@ export default function RunsList() {
               <th className="text-left px-4 py-3">model</th>
               <th className="text-left px-4 py-3">started</th>
               <th className="text-right px-4 py-3">cases</th>
-              <th className="text-right px-4 py-3">det pass</th>
-              <th className="text-right px-4 py-3">judge mean</th>
+              <th className="text-right px-4 py-3">Rule pass</th>
+              <th className="text-right px-4 py-3">Judge score</th>
               <th className="text-left px-4 py-3">probes</th>
             </tr>
           </thead>

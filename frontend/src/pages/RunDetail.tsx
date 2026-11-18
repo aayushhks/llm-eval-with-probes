@@ -99,6 +99,7 @@ export default function RunDetailPage() {
         />
       </div>
 
+      <p className="reading-note">Read the signals together. Probe scores come from a separate Qwen model, not the reviewed model’s own activations; they are diagnostic signals, not verified failure probabilities.</p>
       {/* Disagreements — the headline section */}
       <section>
         <div className="flex items-baseline justify-between mb-4">
@@ -175,12 +176,12 @@ export default function RunDetailPage() {
               <tr>
                 <th className="text-left px-3 py-3">case</th>
                 <th className="text-left px-3 py-3">subset</th>
-                <th className="text-center px-3 py-3">det</th>
+                <th className="text-center px-3 py-3">Rules</th>
                 <th className="text-center px-3 py-3">judge</th>
-                <th className="text-center px-3 py-3">syco</th>
-                <th className="text-center px-3 py-3">uncert</th>
-                <th className="text-center px-3 py-3">ungrnd</th>
-                <th className="text-center px-3 py-3">refuse</th>
+                <th className="text-center px-3 py-3">Sycophancy</th>
+                <th className="text-center px-3 py-3">Uncertainty</th>
+                <th className="text-center px-3 py-3">Ungrounded</th>
+                <th className="text-center px-3 py-3">Refusal</th>
               </tr>
             </thead>
             <tbody>
@@ -251,7 +252,7 @@ function DisagreementCard({ item }: { item: DisagreementItem }) {
         </div>
         <div className="flex items-center gap-3 text-xs">
           <div>
-            <span className="text-zinc-400">det </span>
+            <span className="text-zinc-400">rules </span>
             <Badge tone={item.deterministic_passed ? "good" : "bad"}>
               {item.deterministic_passed ? "pass" : "fail"}
             </Badge>
@@ -283,30 +284,31 @@ function DisagreementCard({ item }: { item: DisagreementItem }) {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-2 mb-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
         <ScoreBar
           value={item.probes.is_sycophantic}
           tone="syco"
-          label="syco"
+          label="Sycophancy"
         />
         <ScoreBar
           value={item.probes.is_uncertain}
           tone="uncert"
-          label="uncert"
+          label="Uncertainty"
         />
         <ScoreBar
           value={item.probes.is_ungrounded}
           tone="ungrnd"
-          label="ungrnd"
+          label="Ungrounded"
         />
         <ScoreBar
           value={item.probes.is_refusing}
           tone="refuse"
-          label="refuse"
+          label="Refusal"
         />
       </div>
 
       <button
+        aria-expanded={expanded}
         onClick={() => setExpanded((e) => !e)}
         className="text-xs text-sky-700 hover:underline"
       >

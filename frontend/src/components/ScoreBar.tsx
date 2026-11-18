@@ -22,7 +22,7 @@ export function ScoreBar({
   if (value === null) {
     return (
       <div className="flex items-center gap-2 text-xs text-zinc-300">
-        {label && <span className="w-16">{label}</span>}
+        {label && <span className="w-24 shrink-0">{label}</span>}
         <span>—</span>
       </div>
     );
@@ -30,7 +30,7 @@ export function ScoreBar({
   const pct = Math.max(0, Math.min(1, value)) * 100;
   return (
     <div className="flex items-center gap-2 text-xs">
-      {label && <span className="w-16 text-zinc-500">{label}</span>}
+      {label && <span className="w-24 shrink-0 text-zinc-500">{label}</span>}
       <div className="flex-1 bg-zinc-100 rounded h-2 overflow-hidden">
         <div
           className={`h-full ${TONE_BG[tone]}`}
