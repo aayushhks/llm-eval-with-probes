@@ -1,7 +1,7 @@
 """Hand-curated training pairs for probing classifiers.
 
-Each probe gets ~50 positive + 50 negative examples to start. Real probes
-typically need 100-500 per class; we'll expand to 100/class later.
+Small exploratory seed set: 42 labeled pairs across four probes.
+Repeated diffs must remain in the same validation group.
 
 Format: list of (diff, model_review, label) triples.
 - label=1 means the behavior is present in (diff, review)

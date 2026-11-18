@@ -17,6 +17,7 @@ from app.core.logging import get_logger
 from app.services.probes.extractor import PROBE_LAYER, extract_activations
 from app.services.probes.scorer import PROBES_DIR
 from app.services.probes.training_data import ALL_PROBES
+from app.services.probes.validation import diff_group, validate_features
 
 logger = get_logger("probes.trainer")
 
@@ -29,6 +30,7 @@ class TrainedProbe:
     n_pos: int
     accuracy_cv: float
     classification_report: dict[str, Any]
+    grouped_validation: dict[str, Any]
 
 
 def _featurize_dataset(examples: list[tuple[str, str, int]]) -> tuple[np.ndarray, np.ndarray]:
@@ -52,7 +54,7 @@ def train_probe(name: str, examples: list[tuple[str, str, int]]) -> TrainedProbe
 
     clf = LogisticRegression(max_iter=2000, C=1.0)
 
-    # Stratified k-fold CV honest accuracy estimate
+    # Legacy example-level CV: diagnostic only; repeated diffs can leak across folds.
     n_splits = min(5, int(min(y.sum(), len(y) - y.sum())))  # cap by smaller class
     if n_splits >= 2:
         cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
@@ -76,6 +78,7 @@ def train_probe(name: str, examples: list[tuple[str, str, int]]) -> TrainedProbe
         n_pos=int(y.sum()),
         accuracy_cv=acc_cv,
         classification_report=report,
+        grouped_validation=validate_features(X, y, [diff_group(d) for d, _, _ in examples]),
     )
 
 
@@ -92,6 +95,9 @@ def save_probe(probe: TrainedProbe) -> Path:
                 "n_train": probe.n_train,
                 "n_pos": probe.n_pos,
                 "accuracy_cv": probe.accuracy_cv,
+                "accuracy_cv_scope": "legacy example-level CV, not unseen-diff generalization",
+                "grouped_validation": probe.grouped_validation,
+                "classification_report_scope": "training-set fit, not held-out performance",
                 "classification_report": probe.classification_report,
                 "extractor_layer": PROBE_LAYER,
             },

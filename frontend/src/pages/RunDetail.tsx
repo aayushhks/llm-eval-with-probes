@@ -6,6 +6,7 @@ import {
   type DisagreementResponse,
   type RunDetail as RunDetailType,
 } from "../lib/api";
+import CaseEvidence from "../components/CaseEvidence";
 import { Badge } from "../components/Badge";
 import { ScoreBar } from "../components/ScoreBar";
 import { FlagPill } from "../components/FlagPill";
@@ -118,7 +119,7 @@ export default function RunDetailPage() {
         ) : (
           <div className="space-y-3">
             {dis.disagreements.map((d) => (
-              <DisagreementCard key={d.case_id} item={d} />
+              <DisagreementCard key={d.case_id} item={d} runId={run.id} />
             ))}
           </div>
         )}
@@ -237,7 +238,7 @@ export default function RunDetailPage() {
   );
 }
 
-function DisagreementCard({ item }: { item: DisagreementItem }) {
+function DisagreementCard({ item, runId }: { item: DisagreementItem; runId: string }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="bg-white border border-zinc-200 rounded-lg p-4 shadow-sm">
@@ -317,6 +318,7 @@ function DisagreementCard({ item }: { item: DisagreementItem }) {
 
       {expanded && (
         <div className="mt-3 space-y-3 text-xs">
+          <CaseEvidence caseId={item.case_id} runId={runId} />
           {item.judge_reasoning && (
             <div>
               <div className="text-zinc-400 mb-1">judge reasoning</div>
