@@ -1,11 +1,14 @@
 """Summarize paired rounds. A bootstrap over cases is not a repeat experiment."""
 
 from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 from scipy.stats import t
 
 
-def summarize_pairs(rounds: list[dict]) -> dict:
+def summarize_pairs(rounds: list[dict[str, Any]]) -> dict[str, Any]:
     ids = [run[arm]["id"] for run in rounds for arm in ("a", "b")]
     if len(ids) != len(set(ids)):
         raise ValueError("A run cannot be counted as multiple independent measurements")
@@ -22,6 +25,9 @@ def summarize_pairs(rounds: list[dict]) -> dict:
         "mean_pass_rate_delta": float(deltas.mean()) if len(deltas) else None,
         "paired_round_deltas": deltas.tolist(),
         "interval_95": interval,
-        "interval_method": "Student t interval across paired rounds; same fixed dataset, not unseen-task generalization",
+        "interval_method": (
+            "Student t interval across paired rounds; "
+            "same fixed dataset, not unseen-task generalization"
+        ),
         "status": "repeated" if len(rounds) >= 3 else "insufficient_repeats",
     }

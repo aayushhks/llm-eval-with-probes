@@ -1,9 +1,11 @@
 import importlib.util
 from pathlib import Path
+
 import numpy as np
 import pytest
-from app.services.probes.validation import validate_features, diff_group
+
 from app.services.eval.repeats import summarize_pairs
+from app.services.probes.validation import diff_group, validate_features
 
 
 def test_grouped_validation_never_trains_on_held_out_diff():
@@ -69,8 +71,9 @@ def test_evidence_matches_actual_sources():
 
 
 def test_candidate_dataset_preserves_original_cases():
-    from app.datasets.loader import load_dataset
     from collections import Counter
+
+    from app.datasets.loader import load_dataset
 
     root = Path(__file__).resolve().parents[2]
     original = load_dataset(root / "datasets/code_review/golden_v1.jsonl")

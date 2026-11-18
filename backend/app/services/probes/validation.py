@@ -3,17 +3,19 @@
 from __future__ import annotations
 
 import hashlib
+from typing import Any
+
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
     accuracy_score,
     balanced_accuracy_score,
+    brier_score_loss,
+    confusion_matrix,
+    f1_score,
     precision_score,
     recall_score,
-    f1_score,
     roc_auc_score,
-    confusion_matrix,
-    brier_score_loss,
 )
 from sklearn.model_selection import LeaveOneGroupOut
 
@@ -23,11 +25,11 @@ def diff_group(diff: str) -> str:
     return hashlib.sha256(" ".join(diff.split()).encode()).hexdigest()
 
 
-def validate_features(X: np.ndarray, y: np.ndarray, groups: list[str]) -> dict:
-    X, y = np.asarray(X), np.asarray(y)
-    if X.ndim != 2 or len(X) != len(y) or len(y) != len(groups):
+def validate_features(features: np.ndarray, y: np.ndarray, groups: list[str]) -> dict[str, Any]:
+    features, y = np.asarray(features), np.asarray(y)
+    if features.ndim != 2 or len(features) != len(y) or len(y) != len(groups):
         raise ValueError("Features, labels and diff groups must have matching lengths")
-    if not np.isfinite(X).all() or set(np.unique(y)) != {0, 1}:
+    if not np.isfinite(features).all() or set(np.unique(y)) != {0, 1}:
         raise ValueError("Finite features and both binary labels are required")
     if len(set(groups)) < 2:
         return {
@@ -40,7 +42,7 @@ def validate_features(X: np.ndarray, y: np.ndarray, groups: list[str]) -> dict:
         }
     scores = np.full(len(y), np.nan)
     folds = []
-    for train, test in LeaveOneGroupOut().split(X, y, groups):
+    for train, test in LeaveOneGroupOut().split(features, y, groups):
         record = {
             "held_out_group": groups[int(test[0])],
             "n_train": len(train),
@@ -51,8 +53,8 @@ def validate_features(X: np.ndarray, y: np.ndarray, groups: list[str]) -> dict:
             record["status"] = "skipped_single_class_training"
         else:
             model = LogisticRegression(max_iter=2000, C=1.0, random_state=42)
-            model.fit(X[train], y[train])
-            scores[test] = model.predict_proba(X[test])[:, 1]
+            model.fit(features[train], y[train])
+            scores[test] = model.predict_proba(features[test])[:, 1]
             record["status"] = "evaluated"
         folds.append(record)
     full = bool(np.isfinite(scores).all())
